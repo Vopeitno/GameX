@@ -11,5 +11,8 @@ white = pygame.Color(255, 255, 255)
 red = pygame.Color(255, 0, 0)
 green = pygame.Color(0, 255, 0)
 blue = pygame.Color(0, 0, 255)
+gray = pygame.Color(128,128,128)
 
-score = 0  # Для подсчета очков
+FPS = 10  # Скорость игры (кадров в секунду)
+
+score = 0

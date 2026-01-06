@@ -3,6 +3,7 @@ import sys  #  импорт для выхода из программы
 from config import *
 from snake import Snake # импортируем все из кода Арсена
 from food import spawn_food, draw_food, check_food_eaten, increase_score, get_score     # импортируем все из кода Сережи
+
 class GameEngine:   # создание чертежа для игры 
     """управление всего что происходит на экране""" 
     
@@ -78,7 +79,7 @@ class GameEngine:   # создание чертежа для игры
             return
         
         self.snake.move()    # Двигаем змейку
-        #check_self_collision, check_wall_collision проверяем не врезалась ли змейка в себя, стенку
+        #check_self_collision, check_wall_collision проверяем
         if self.snake.check_self_collision() or self.snake.check_wall_collision(): 
             self.state = 3  # Если врезалась, переходим в состояние "проиграли"
             return
@@ -86,7 +87,7 @@ class GameEngine:   # создание чертежа для игры
         # Проверяем, не съела ли змейка еду
         if check_food_eaten(self.snake.get_head_position()):
             self.snake.grow()          # Змейка растет
-            increase_score(10)         # +10 очков
+            increase_score(1)         # +1 очко
             self.food = spawn_food(self.snake.get_body())  # создаем новая еду если змейка съела прошлую
 
     def draw(self):
@@ -106,16 +107,16 @@ class GameEngine:   # создание чертежа для игры
         if self.state == 0:  # Стартовый экран
             title = self.font_big.render("ЗМЕЙКА", True, green)
             start = self.font_normal.render("ПРОБЕЛ - начать", True, white)
-            exit_text = self.font_normal.render("ESC - выйти", True, gray)
+            exit_text = self.font_normal.render("ESC - выйти", True, white)
             
-            self.screen.blit(title, (screen_x//2 - title.get_width()//2, screen_y//3))
-            self.screen.blit(start, (screen_x//2 - start.get_width()//2, screen_y//2))
-            self.screen.blit(exit_text, (screen_x//2 - exit_text.get_width()//2, screen_y//2 + 50)) # центрируем текст по горизонтали
+            self.screen.blit(title, (screen_x//2 - title.get_width()//2, screen_y//2 + 20))
+            self.screen.blit(start, (screen_x//2 - start.get_width()//2, screen_y//2 + 80))
+            self.screen.blit(exit_text, (screen_x//2 - exit_text.get_width()//2, screen_y//2 + 130))
         
         elif self.state == 2:  # Пауза
             pause = self.font_big.render("ПАУЗА", True, blue)
             continue_text = self.font_normal.render("ESC - продолжить", True, white)
-            restart = self.font_normal.render("R - начать заново", True, gray)
+            restart = self.font_normal.render("R - начать заново", True, white)
             
             self.screen.blit(pause, (screen_x//2 - pause.get_width()//2, screen_y//3))
             self.screen.blit(continue_text, (screen_x//2 - continue_text.get_width()//2, screen_y//2))
@@ -123,28 +124,25 @@ class GameEngine:   # создание чертежа для игры
         
         elif self.state == 3:  # Проиграли
             game_over = self.font_big.render("ПРОИГРАЛИ!", True, red)
-            score = self.font_normal.render(f"Ваш счет: {get_score()}", True, white)
+            score_final = self.font_normal.render(f"Ваш счет: {get_score()}", True, white)
             restart = self.font_normal.render("R - начать заново", True, green)
-            menu = self.font_normal.render("ESC - в меню", True, gray)
+            menu = self.font_normal.render("ESC - в меню", True, white)
             
             self.screen.blit(game_over, (screen_x//2 - game_over.get_width()//2, screen_y//3))
-            self.screen.blit(score, (screen_x//2 - score.get_width()//2, screen_y//2))
+            self.screen.blit(score_final, (screen_x//2 - score_final.get_width()//2, screen_y//2))
             self.screen.blit(restart, (screen_x//2 - restart.get_width()//2, screen_y//2 + 50))
             self.screen.blit(menu, (screen_x//2 - menu.get_width()//2, screen_y//2 + 100))
         
         # Обновляем экран
         pygame.display.flip()
 
-    def reset_game(self):   # полный сброс игры для того чтобы начать заново
-        """Сбрасываем игру в начальное состояние"""
-        self.snake.reset()  # Сбрасываем змейку
-        
-        # Сбрасываем счет
-        global score
-        score = 0
-        
-        self.food = spawn_food(self.snake.get_body())  # Новая еда
-        self.state = 1  # Начинаем играть
+    def reset_game(self):   
+        self.snake.reset()
+        from food import reset_score, spawn_food
+        reset_score()
+        self.food = spawn_food(self.snake.get_body())
+        self.state = 1
+
 
     def run(self):
         """цикл работает пока игра не закрыта"""
@@ -154,11 +152,11 @@ class GameEngine:   # создание чертежа для игры
             self.draw()            # 3. Рисуем всё на экране
             self.clock.tick(FPS)   # 4. Контролируем скорость
 
-# Точка входа в программу
+# Точка входа в программу (СНАРУЖИ класса!)
 def start_game():
     """Функция которая запускает игру"""
     game = GameEngine()
     game.run()
 
 if __name__ == "__main__":
-    start_game()   
+    start_game()

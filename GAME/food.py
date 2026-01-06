@@ -43,15 +43,23 @@ def check_food_eaten(snake_head):
         return True
     return False
 
-def increase_score(points=1):
-    """Увеличивает счет на указанное количество очков"""
+def reset_score():
+    """Полный сброс счёта"""
+    global score, _food_spawned
+    score = 0
+    return score
+
+def increase_score(points=10):
+    """Увеличивает счет"""
     global score
     score += points
     return score
 
 def get_score():
-    """Возвращает текущий счет"""
+    """Возвращает счет"""
+    global score
     return score
+
 
 def get_food_position():
     """Возвращает текущую позицию еды или None если еды нет"""
