@@ -49,7 +49,7 @@ def reset_score():
     score = 0
     return score
 
-def increase_score(points=10):
+def increase_score(points=1):
     """Увеличивает счет"""
     global score
     score += points
