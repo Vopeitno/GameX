@@ -1,8 +1,12 @@
 import pygame  # импорт библиотеки для игр
 import sys  #  импорт для выхода из программы
+import os   # для проверки путей к файлам
 from config import *
 from snake import Snake # импортируем все из кода Арсена
-from food import spawn_food, draw_food, check_food_eaten, increase_score, get_score     # импортируем все из кода Сережи
+from food import spawn_food, draw_food, check_food_eaten, increase_score, get_score
+from sfx import load_bg_music, stop_bg_music, play_eat_sound, play_dead_sound, play_button_sound, play_pause_sound  # Импорт SFX
+from fonts import get_font  # Импорт шрифтов
+
 
 class GameEngine:   # создание чертежа для игры 
     """управление всего что происходит на экране""" 
@@ -10,7 +14,7 @@ class GameEngine:   # создание чертежа для игры
     def __init__(self):
         pygame.init()  # Запускаем pygame
         
-        self.screen = pygame.display.set_mode((screen_x, screen_y)) # Создаем окно игры 800 на 600
+        self.screen = pygame.display.set_mode((screen_x, screen_y)) # Создаем окно игры 720 на 480
         pygame.display.set_caption("Змейка")
         
         self.clock = pygame.time.Clock()    # Часы для контроля скорости игры
@@ -21,9 +25,13 @@ class GameEngine:   # создание чертежа для игры
         self.snake = Snake()  # Наша змейка
         self.food = spawn_food(self.snake.get_body())  # Первая еда
         
-        # Шрифты для текста (None = системный шрифт)
-        self.font_big = pygame.font.Font(None, 48)   # Большой для заголовков none значит шрифт по умолчанию
-        self.font_normal = pygame.font.Font(None, 36) # Обычный для текста
+        # Шрифты для текста (кастомные Oswald из fonts.py)
+        self.font_big = get_font(48)   # Большой для заголовков
+        self.font_normal = get_font(36) # Обычный для текста
+        
+        # Загружаем фоновую музыку BG_Music.mp3 (если файл существует)
+        if os.path.exists("SFX/BG_Music.mp3"):
+            load_bg_music("BG_Music.mp3")
 
     def handle_events(self):    # благодаря этому методу мы следим за событиями(нажатие клавишь)
         """Обрабатываем все события: нажатия клавиш, закрытие окна"""
@@ -31,6 +39,7 @@ class GameEngine:   # создание чертежа для игры
             
             # Если нажали крестик - закрываем игру
             if event.type == pygame.QUIT:
+                stop_bg_music()  # Останавливаем музыку при выходе
                 pygame.quit()
                 sys.exit()
             
@@ -40,8 +49,11 @@ class GameEngine:   # создание чертежа для игры
                 # СТАРТОВЫЙ ЭКРАН - 0
                 if self.state == 0:
                     if event.key == pygame.K_SPACE:
+                        play_button_sound()
                         self.state = 1  # Начинаем игру
                     elif event.key == pygame.K_ESCAPE:
+                        play_button_sound()
+                        stop_bg_music()
                         pygame.quit()
                         sys.exit()  # Выходим из игры
                 
@@ -56,20 +68,25 @@ class GameEngine:   # создание чертежа для игры
                     elif event.key == pygame.K_RIGHT:
                         self.snake.change_direction("RIGHT")
                     elif event.key == pygame.K_ESCAPE:
+                        play_pause_sound()
                         self.state = 2  # Ставим на паузу
                 
                 # ПАУЗА - 2
                 elif self.state == 2:
                     if event.key == pygame.K_ESCAPE:
+                        play_pause_sound()
                         self.state = 1  # Продолжаем игру
                     elif event.key == pygame.K_r:
+                        play_button_sound()
                         self.reset_game()  # Начинаем заново
                 
                 # ПРОИГРАЛИ - 3
                 elif self.state == 3:
                     if event.key == pygame.K_r:
+                        play_button_sound()
                         self.reset_game()  # Перезапуск
                     elif event.key == pygame.K_ESCAPE:
+                        play_pause_sound()
                         self.state = 0  # Выход в меню
 
     def update_game(self):  # обновление игрового мира 10 раз в секунду 
@@ -81,14 +98,17 @@ class GameEngine:   # создание чертежа для игры
         self.snake.move()    # Двигаем змейку
         #check_self_collision, check_wall_collision проверяем
         if self.snake.check_self_collision() or self.snake.check_wall_collision(): 
+            play_dead_sound()
             self.state = 3  # Если врезалась, переходим в состояние "проиграли"
+            stop_bg_music()  # Останавливаем музыку при проигрыше
             return
         
         # Проверяем, не съела ли змейка еду
         if check_food_eaten(self.snake.get_head_position()):
             self.snake.grow()          # Змейка растет
-            increase_score(1)         # +1 очко
-            self.food = spawn_food(self.snake.get_body())  # создаем новая еду если змейка съела прошлую
+            increase_score(1)          # +1 очко
+            play_eat_sound()           # Звук поедания еды!
+            self.food = spawn_food(self.snake.get_body())  # создаем новую еду если змейка съела прошлую
 
     def draw(self):
         """Рисуем всё на экране"""
@@ -136,13 +156,16 @@ class GameEngine:   # создание чертежа для игры
         # Обновляем экран
         pygame.display.flip()
 
-    def reset_game(self):   
+    def reset_game(self):     
         self.snake.reset()
         from food import reset_score, spawn_food
         reset_score()
         self.food = spawn_food(self.snake.get_body())
         self.state = 1
-
+        # Перезапуск фоновой музыки после reset
+        stop_bg_music()
+        if os.path.exists("SFX/BG_Music.mp3"):
+            load_bg_music("BG_Music.mp3")
 
     def run(self):
         """цикл работает пока игра не закрыта"""
@@ -152,11 +175,8 @@ class GameEngine:   # создание чертежа для игры
             self.draw()            # 3. Рисуем всё на экране
             self.clock.tick(FPS)   # 4. Контролируем скорость
 
-# Точка входа в программу (СНАРУЖИ класса!)
+# Точка входа в программу (СНАРУЖИ класса!) - импортируется из main.py
 def start_game():
     """Функция которая запускает игру"""
     game = GameEngine()
     game.run()
-
-if __name__ == "__main__":
-    start_game()

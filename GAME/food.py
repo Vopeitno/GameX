@@ -2,6 +2,7 @@ import pygame
 import random
 from config import screen_x, screen_y, block_size, red, score
 
+
 # Внутренние переменные модуля (не трогать извне)
 _food_pos = (0, 0)
 _food_spawned = False

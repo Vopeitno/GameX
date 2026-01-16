@@ -16,3 +16,5 @@ gray = pygame.Color(128,128,128)
 FPS = 10  # Скорость игры (кадров в секунду)
 
 score = 0
+
+from fonts import get_font
