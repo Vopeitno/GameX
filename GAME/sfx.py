@@ -1,7 +1,7 @@
 import pygame
 import os
 
-# Инициализация mixer (безопасно)
+# Инициализация mixer
 try:
     pygame.mixer.init(frequency=22050, size=-16, channels=2, buffer=512)
 except:
@@ -86,14 +86,3 @@ def stop_bg_music():
         pygame.mixer.music.stop()
     except:
         pass
-
-# Функции изменения громкости (бонус)
-def set_eat_volume(volume):  # 0.0 - 1.0
-    global VOLUME_EAT
-    VOLUME_EAT = volume
-    if eat_sound: eat_sound.set_volume(volume)
-
-def set_music_volume(volume):
-    global VOLUME_MUSIC
-    VOLUME_MUSIC = volume
-    pygame.mixer.music.set_volume(volume)
