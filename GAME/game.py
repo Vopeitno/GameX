@@ -2,7 +2,7 @@ import pygame  # импорт библиотеки для игр
 import sys  #  импорт для выхода из программы
 import os   # для проверки путей к файлам
 import random  # для случайных значений в частицах
-import math    # для математики в анимациях
+import math    # для математики и пульсации в еде
 from config import *
 from snake import Snake # импортируем все из кода Арсена
 from food import spawn_food, draw_food, check_food_eaten, increase_score, get_score
@@ -18,7 +18,7 @@ class Particle:
         self.vx = random.uniform(-10, 10)  # скорость по X -10 и 10
         self.vy = random.uniform(-10, 10)  # скорость по Y тут так же как и по X
         self.lifetime = 15  # живет 15 кадров
-        self.color = (255, 50, 50)  # красный цвет (простой кортеж)
+        self.color = (255, 50, 50)  # красный цвет
         self.size = random.randint(3, 6)  # случайный размер
     
     def update(self):
@@ -162,7 +162,7 @@ class GameEngine:   # создание чертежа для игры
                            (x + pulse//2, y + pulse//2,
                             block_size - pulse, block_size - pulse))
     
-    # Метод для подсветки границ экрана (УПРОЩЁННЫЙ)
+    # Метод для подсветки границ экрана
     def draw_glow_effect(self):
         """Рисует свечение по краям экрана"""
         if self.glow_surface is None:
